@@ -1,8 +1,7 @@
 import tmi from 'tmi.js';
-import { getWorldRecord, getMapInfo } from './api.js';
+import { getWorldRecord, getMapInfo, getCurrentWarcupId, getNewsByWarcupId } from './api.js';
 // https://twitchapps.com/ for generating token
 
-// TODO: phantasm-base has only cpm record and producee error in vq3Promise
 // TODO: add typescript
 
 const opts = {
@@ -10,7 +9,7 @@ const opts = {
     username: 'defrag_bot',
     password: 'oauth:behcqsx50syx109sieq4pfe8kzseey',
   },
-  channels: ['w00deh', 'ofsyntax', 'defrag_bot'],
+  channels: ['defraglive', 'w00deh', 'ofsyntax', 'defrag_bot'],
 };
 
 const client = new tmi.Client(opts);
@@ -22,6 +21,7 @@ async function onMessageHandler(channel, ctx, msg, self) {
   if (self) return;
 
   const message = msg.trim();
+
   if (message === '!wr') {
     client.say(channel, `@${ctx.username}, incorrect command. Please, use !wr <map_name>`);
     return;
@@ -31,16 +31,13 @@ async function onMessageHandler(channel, ctx, msg, self) {
     const mapName = message.split(' ')[1];
     const physic = message.split(' ')[2] || 'cpm';
 
-    const vq3Promise = getWorldRecord(mapName, 'vq3');
-    const cpmPromise = getWorldRecord(mapName, 'cpm');
-
-    Promise.allSettled([vq3Promise, cpmPromise])
+    Promise.allSettled([getWorldRecord(mapName, 'vq3'), getWorldRecord(mapName, 'cpm')])
       .then((results) => {
         const fulfilledResults = results
           .filter((result) => result.status === 'fulfilled')
           .map((result) => result.value);
 
-        //means both cpm and vq3 resolved
+        //means both getWorldRecord cpm and vq3 resolved
         if (fulfilledResults.length == 2) {
           const vq3Time = fulfilledResults[0].time;
           const vq3Player = fulfilledResults[0].name;
@@ -66,7 +63,6 @@ async function onMessageHandler(channel, ctx, msg, self) {
       });
   }
 
-  // map: name, author, createdAt, bestTimeVQ3, bestTimeCPM
   if (message.startsWith('!map')) {
     const map = message.trim().split(' ')[1];
 
@@ -80,6 +76,19 @@ async function onMessageHandler(channel, ctx, msg, self) {
       })
       .catch((e) => {
         client.say(channel, `@${ctx.username}, wrong map name`);
+        console.error(e);
+      });
+  }
+
+  if (message === '!warcup') {
+    const warcupID = await getCurrentWarcupId();
+    getNewsByWarcupId(warcupID)
+      .then((data) => {
+        const { startDateTime, endDateTime, fullName, shortName, map1 } = data;
+        client.say(channel, `@${ctx.username}, ${fullName} | ${shortName} | end at ${endDateTime}`);
+      })
+      .catch((e) => {
+        client.say(channel, `@${ctx.username}, smth wrong with warcup`);
         console.error(e);
       });
   }
