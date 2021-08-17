@@ -1,10 +1,6 @@
 import https from 'https';
 import { parseWR, parseMapInfo } from './parser.js';
 
-// dfcomps api:
-// https://dfcomps.ru/api/cup/next_cup_info
-// https://dfcomps.ru/api/news/single/596
-
 export function getWorldRecord(mapName, physic = 'cpm') {
   let physicID = physic == 'cpm' ? 1 : 0;
 
@@ -101,9 +97,7 @@ export async function getCurrentWarcupId() {
   });
 }
 
-// getCurrentWarcup().then((data) => console.log('data', data));
-
-export async function getNewsByWarcupId(id) {
+export async function getNewsById(id) {
   // const warcupID = await getCurrentWarcup();
 
   return new Promise((resolve, reject) => {
