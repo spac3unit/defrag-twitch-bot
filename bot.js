@@ -1,5 +1,7 @@
 import tmi from 'tmi.js';
 import { getWorldRecord, getMapInfo, getCurrentWarcupId, getNewsByWarcupId } from './api.js';
+import { compareAsc, format } from 'date-fns';
+
 // https://twitchapps.com/ for generating token
 
 // TODO: add typescript
@@ -18,7 +20,7 @@ client.connect();
 client.on('message', onMessageHandler);
 
 async function onMessageHandler(channel, ctx, msg, self) {
-  if (self) return;
+  // if (self) return;
 
   const message = msg.trim();
 
@@ -85,7 +87,12 @@ async function onMessageHandler(channel, ctx, msg, self) {
     getNewsByWarcupId(warcupID)
       .then((data) => {
         const { startDateTime, endDateTime, fullName, shortName, map1 } = data;
-        client.say(channel, `@${ctx.username}, ${fullName} | ${shortName} | end at ${endDateTime}`);
+        const formattedEndDate = format(new Date(endDateTime), 'dd MMM ');
+        const formattedStartDate = format(new Date(startDateTime), 'dd MMM ');
+        client.say(
+          channel,
+          `@${ctx.username}, ${fullName} | ${shortName} | ${formattedStartDate} - ${formattedEndDate} | https://dfcomps.ru/news/599`
+        );
       })
       .catch((e) => {
         client.say(channel, `@${ctx.username}, smth wrong with warcup`);
