@@ -68,7 +68,6 @@ async function onMessageHandler(channel, ctx, msg, self) {
 
     getMapInfo(map)
       .then((result) => {
-        console.log('result: ', result);
         const { mapAuthor, createdAt } = result;
         const formattedDate = createdAt.replace(/(?!-)[^0-9.]/g, ''); // replace Release date2009-02-10 to 2009-02-10
 

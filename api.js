@@ -1,133 +1,75 @@
 import https from 'https';
+import axios from 'axios';
 import { parseWR, parseMapInfo } from './parser.js';
+// https://stackoverflow.com/questions/64333057/how-to-merge-parallel-axios-get-requests-and-promise-allsettled-function-with-so
+// https://www.twilio.com/blog/2017/08/http-requests-in-node-js.html
+// qstat -P -q3s 83.243.73.220:27965
+// gamedig --type quake3 83.243.73.220:27961
 
-export function getWorldRecord(mapName, physic = 'cpm') {
-  let physicID = physic == 'cpm' ? 1 : 0;
-
+export async function getNewsById(id) {
+  let url = `https://dfcomps.ru/api/news/single/${id}/`;
   return new Promise((resolve, reject) => {
-    const options = {
-      hostname: 'www.q3df.org',
-      path: `/records/details?map=${mapName}&mode=-1&physic=${physicID}`,
-    };
-
-    const req = https.request(options, (res) => {
-      let data = '';
-      let wrTime = {};
-      res.on('data', function (chunk) {
-        data += chunk;
+    axios
+      .get(url)
+      .then((response) => {
+        console.log(response.data.cup);
+        resolve(response.data.cup);
+      })
+      .catch((e) => {
+        console.error(e);
+        reject(e.message);
       });
-
-      res.on('end', function () {
-        try {
-          wrTime = { physic, ...parseWR(data) };
-        } catch (e) {
-          reject(e);
-        }
-        resolve(wrTime);
-      });
-    });
-
-    req.on('error', (e) => {
-      reject(e.message);
-    });
-
-    req.end();
-  });
-}
-
-export function getMapInfo(mapName) {
-  return new Promise((resolve, reject) => {
-    const options = {
-      hostname: 'ws.q3df.org',
-      path: `/map/${mapName}/`,
-    };
-
-    const req = https.request(options, (res) => {
-      let data = '';
-      let mapInfo = '';
-      res.on('data', function (chunk) {
-        data += chunk;
-      });
-
-      res.on('end', function () {
-        try {
-          mapInfo = parseMapInfo(data);
-        } catch (e) {
-          reject(e);
-        }
-        resolve(mapInfo);
-      });
-    });
-
-    req.on('error', (e) => {
-      reject(e.message);
-    });
-
-    req.end();
   });
 }
 
 export async function getCurrentWarcupId() {
   let url = 'https://dfcomps.ru/api/cup/next_cup_info';
-  return new Promise((resolve, reject) => {
-    const req = https.get(url, function (res) {
-      let body = '';
-      let warcupID = '';
-      let response = '';
-      res.on('data', function (chunk) {
-        body += chunk;
-      });
 
-      res.on('end', function () {
-        try {
-          response = JSON.parse(body);
-          warcupID = response.newsId;
-        } catch (e) {
-          reject(e);
-        }
-        resolve(warcupID);
-        // console.log('Got a response: ', response);
+  return new Promise((resolve, reject) => {
+    axios
+      .get(url)
+      .then((response) => {
+        console.log(response.data.newsId);
+        resolve(response.data.newsId);
+      })
+      .catch((e) => {
+        console.error(e);
+        reject(e.message);
       });
-    });
-    req.on('error', function (e) {
-      console.log('Got an error: ', e);
-      reject(e.message);
-    });
-    req.end();
   });
 }
 
-export async function getNewsById(id) {
-  // const warcupID = await getCurrentWarcup();
+export async function getWorldRecord(map, physic = 'cpm') {
+  let physicID = physic == 'cpm' ? 1 : 0;
+  let url = `https://q3df.org/records/details?map=${map}&mode=-1&physic=${physicID}`;
 
   return new Promise((resolve, reject) => {
-    const options = {
-      hostname: 'dfcomps.ru',
-      path: `/api/news/single/${id}/`,
-    };
-
-    const req = https.request(options, (res) => {
-      let body = '';
-      let warcupInfo = '';
-      res.on('data', function (chunk) {
-        body += chunk;
+    axios
+      .get(url)
+      .then((response) => {
+        let wr = parseWR(response.data);
+        let result = { physic, ...wr };
+        resolve(result);
+      })
+      .catch((e) => {
+        console.error(e);
+        reject(e.message);
       });
+  });
+}
 
-      res.on('end', function () {
-        try {
-          let response = JSON.parse(body);
-          warcupInfo = response.cup;
-        } catch (e) {
-          reject(e);
-        }
-        resolve(warcupInfo);
+export async function getMapInfo(mapName) {
+  let url = `https://ws.q3df.org/map/${mapName}/`;
+  return new Promise((resolve, reject) => {
+    axios
+      .get(url)
+      .then((response) => {
+        const mapInfo = parseMapInfo(response.data);
+        resolve(mapInfo);
+      })
+      .catch((e) => {
+        console.error(e);
+        reject(e.message);
       });
-    });
-
-    req.on('error', (e) => {
-      reject(e.message);
-    });
-
-    req.end();
   });
 }
