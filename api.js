@@ -8,6 +8,7 @@ import { parseWR, parseMapInfo } from './parser.js';
 
 export async function getNewsById(id) {
   let url = `https://dfcomps.ru/api/news/single/${id}/`;
+
   return new Promise((resolve, reject) => {
     axios
       .get(url)
@@ -60,6 +61,7 @@ export async function getWorldRecord(map, physic = 'cpm') {
 
 export async function getMapInfo(mapName) {
   let url = `https://ws.q3df.org/map/${mapName}/`;
+
   return new Promise((resolve, reject) => {
     axios
       .get(url)
