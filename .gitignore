@@ -16,3 +16,4 @@ lerna-debug.log*
 .npm
 
 node_modules/
+.vscode/

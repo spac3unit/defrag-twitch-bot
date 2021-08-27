@@ -2,13 +2,12 @@ import tmi from 'tmi.js';
 import { getWorldRecord, getMapInfo, getCurrentWarcupId, getNewsById } from './api.js';
 import { format } from 'date-fns';
 
-// https://twitchapps.com/ for generating token
-// TODO: add typescript
+// https://twitchapps.com/
 
 const opts = {
   identity: {
     username: 'defrag_bot',
-    password: 'oauth:behcqsx50syx109sieq4pfe8kzseey',
+    password: '',
   },
   channels: ['defraglive', 'w00deh', 'ofsyntax', 'defrag_bot'],
 };
@@ -19,7 +18,7 @@ client.connect();
 client.on('message', onMessageHandler);
 
 async function onMessageHandler(channel, ctx, msg, self) {
-  // if (self) return;
+  if (self) return;
   const message = msg.trim();
 
   if (message === '!wr') {

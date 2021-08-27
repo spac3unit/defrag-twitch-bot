@@ -1,10 +1,6 @@
 import https from 'https';
 import axios from 'axios';
 import { parseWR, parseMapInfo } from './parser.js';
-// https://stackoverflow.com/questions/64333057/how-to-merge-parallel-axios-get-requests-and-promise-allsettled-function-with-so
-// https://www.twilio.com/blog/2017/08/http-requests-in-node-js.html
-// qstat -P -q3s 83.243.73.220:27965
-// gamedig --type quake3 83.243.73.220:27961
 
 export async function getNewsById(id) {
   let url = `https://dfcomps.ru/api/news/single/${id}/`;
